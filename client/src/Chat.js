@@ -1,43 +1,27 @@
-import React, { Component } from 'react';
-import { addMessage, getMessages, onMessageAdded } from './graphql/queries';
-import MessageInput from './MessageInput';
+import { useQuery, useMutation } from '@apollo/react-hooks';
+import { addMessageMutation, messagesQuery } from './graphql/queries';
+import React from 'react';
 import MessageList from './MessageList';
+import MessageInput from './MessageInput';
 
-class Chat extends Component {
-  state = {messages: []};
-  subscription = null;
+const Chat = ({user}) => {
+    const {data} = useQuery(messagesQuery);
+    const [addMessage] = useMutation(addMessageMutation);
+    const messages = data ? data.messages : [];
 
-  async componentDidMount() {
-    const messages = await getMessages();
-    this.setState({messages});
-    this.subscription = onMessageAdded((message) => {
-      this.setState({messages: this.state.messages.concat(message)});
-    });
-  }
+    const handleSend = async (text)=> {
+        await addMessage({variables: {input: {text}}});
+    };
 
-  componentWillUnmount() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-  }
-
-  async handleSend(text) {
-    await addMessage(text);
-  }
-
-  render() {
-    const {user} = this.props;
-    const {messages} = this.state;
     return (
       <section className="section">
         <div className="container">
           <h1 className="title">Chatting as {user}</h1>
           <MessageList user={user} messages={messages} />
-          <MessageInput onSend={this.handleSend.bind(this)} />
+          <MessageInput onSend={handleSend} />
         </div>
       </section>
     );
-  }  
 }
 
 export default Chat;
