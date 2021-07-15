@@ -7,10 +7,15 @@ const expressJwt = require('express-jwt');
 const jwt = require('jsonwebtoken');
 const db = require('./db');
 
-const port = 9000;
+const PORT = process.env.PORT || 9000;
 const jwtSecret = Buffer.from('xkMBdsE+P6242Z2dPV3RD91BPbLIko7t', 'base64');
 
 const app = express();
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static("client/build"));
+}
+
 app.use(cors(), express.json(), expressJwt({
   credentialsRequired: false,
   secret: jwtSecret,
@@ -45,7 +50,10 @@ app.post('/login', (req, res) => {
   res.send({token});
 });
 
+app.get('*', function (req, res) {
+  res.sendFile(path.join(__dirname, './client/build/index.html'));
+})
 // Enables a websocket to be used for GraphQL
 const httpServer = http.createServer(app);
 apolloServer.installSubscriptionHandlers(httpServer);
-httpServer.listen(port, () => console.log(`Server started on port ${port}`));
+httpServer.listen(PORT, () => console.log(`Server started on port ${PORT}`));
