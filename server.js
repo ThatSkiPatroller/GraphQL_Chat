@@ -6,6 +6,7 @@ const express = require('express');
 const expressJwt = require('express-jwt');
 const jwt = require('jsonwebtoken');
 const db = require('./db');
+const path = require('path');
 
 const PORT = process.env.PORT || 9000;
 const jwtSecret = Buffer.from('xkMBdsE+P6242Z2dPV3RD91BPbLIko7t', 'base64');
